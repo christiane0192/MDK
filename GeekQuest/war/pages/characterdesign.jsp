@@ -24,9 +24,10 @@ BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService(
     <td>Name:</td>
     <td><input type="text" size="30" maxlength="30" id="playername" name="playername" value="${pname}"></td>
   </tr>
+      <tr><td><a href="http://www.html-seminar.de/html-links.htm" id="link" name="link">Need help finding a good hobbit name?</a> </td></tr>
   <tr>
     <td>Character class:</td>
-   <td><select name='character'>
+   <td><select name="character" id="character">
 	<c:forEach items="${characters}" var="temp">
 		<option value='${temp}'>${temp}</option>
 	</c:forEach>
@@ -57,7 +58,6 @@ BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService(
 				        <td><input type="checkbox" name="checkbox${mission.properties.description}" /></td>
 				    </c:otherwise>
 				</c:choose>
-	            
 	        </tr>
 	    </c:forEach>
 	    </table>
@@ -72,3 +72,21 @@ BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService(
  </form>
 </body>
 </html>
+<script type="text/javascript">
+   var sel = document.getElementById('character');
+   var link = document.getElementById('link');
+   if(sel.value=='HOBBIT'){
+  	link.style.visibility = 'visible';
+   }
+   else{
+   	link.style.visibility = 'hidden';
+   }
+   sel.onchange = function() {
+      if(sel.value=='HOBBIT'){
+  			link.style.visibility = 'visible';
+  	 }
+	   else{
+	   	link.style.visibility = 'hidden';
+	   }
+   }
+</script>
