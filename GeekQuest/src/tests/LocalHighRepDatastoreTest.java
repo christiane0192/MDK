@@ -1,7 +1,7 @@
 package tests;
 
-
 import static org.junit.Assert.*;
+import geek.HighscoreCalculator;
 import geek.WelcomeServlet;
 
 import org.junit.After;
@@ -22,35 +22,38 @@ import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 public class LocalHighRepDatastoreTest {
 
 	// maximum eventual consistency
-	  private final LocalServiceTestHelper helper =
-	      new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig()
-	          .setDefaultHighRepJobPolicyUnappliedJobPercentage(100));
+	private final LocalServiceTestHelper helper = new LocalServiceTestHelper(
+			new LocalDatastoreServiceTestConfig()
+					.setDefaultHighRepJobPolicyUnappliedJobPercentage(100));
 
-	  @Before
-	  public void setUp() {
-	    helper.setUp();
-	  }
+	@Before
+	public void setUp() {
+		helper.setUp();
+	}
 
-	  @After
-	  public void tearDown() {
-	    helper.tearDown();
-	  }
+	@After
+	public void tearDown() {
+		helper.tearDown();
+	}
 
 	@Test
-	  public void testQuery() throws EntityNotFoundException {
+	public void testQuery() throws EntityNotFoundException {
 
-			DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+		DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
 
-			String kindPlayer = "Player";
-			String emailPlayer = "email100@test.de";
-			Key keyPlayer = KeyFactory.createKey(kindPlayer, emailPlayer);
-			Entity player = new Entity(keyPlayer);
-			player.setProperty("score", 1000);
-		    ds.put(player);
+		String kindPlayer = "Player";
+		String emailPlayer = "email100@test.de";
+		Key keyPlayer = KeyFactory.createKey(kindPlayer, emailPlayer);
+		Entity player = new Entity(keyPlayer);
+		player.setProperty("score", 1000);
+		ds.put(player);
 
-		    assertEquals(0, ds.prepare(WelcomeServlet.getHighscorePlayerQuery()).countEntities(FetchOptions.Builder.withLimit(10)));
-		    assertEquals(1, ds.prepare(new Query(kindPlayer, keyPlayer)).countEntities(FetchOptions.Builder.withLimit(10)));
+		assertEquals(0,
+				ds.prepare(HighscoreCalculator.getHighscorePlayerQuery())
+						.countEntities(FetchOptions.Builder.withLimit(10)));
+		assertEquals(1, ds.prepare(new Query(kindPlayer, keyPlayer))
+				.countEntities(FetchOptions.Builder.withLimit(10)));
 
-	  }
+	}
 
 }

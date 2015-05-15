@@ -1,6 +1,7 @@
 package tests;
 
 import static org.junit.Assert.*;
+import geek.HighscoreCalculator;
 import geek.WelcomeServlet;
 
 import org.junit.After;
@@ -102,36 +103,42 @@ public class LocalCustomPolicyHighRepDatastoreTest {
 
 	private void test2Players(DatastoreService ds) {
 		// first global query only sees the first Entity
-		assertEquals(1, ds.prepare(WelcomeServlet.getHighscorePlayerQuery())
-				.countEntities(FetchOptions.Builder.withLimit(10)));
+		assertEquals(1,
+				ds.prepare(HighscoreCalculator.getHighscorePlayerQuery())
+						.countEntities(FetchOptions.Builder.withLimit(10)));
 		// second global query sees both Entities because we "groom" (attempt to
 		// apply unapplied jobs) after every query
-		assertEquals(2, ds.prepare(WelcomeServlet.getHighscorePlayerQuery())
-				.countEntities(FetchOptions.Builder.withLimit(10)));
+		assertEquals(2,
+				ds.prepare(HighscoreCalculator.getHighscorePlayerQuery())
+						.countEntities(FetchOptions.Builder.withLimit(10)));
 
 	}
 
 	private void test3Players(DatastoreService ds) {
 		// first global query only sees first an third Entity
-		assertEquals(2, ds.prepare(WelcomeServlet.getHighscorePlayerQuery())
-				.countEntities(FetchOptions.Builder.withLimit(10)));
+		assertEquals(2,
+				ds.prepare(HighscoreCalculator.getHighscorePlayerQuery())
+						.countEntities(FetchOptions.Builder.withLimit(10)));
 		// second global query sees all three Entities because we "groom"
 		// (attempt to
 		// apply unapplied jobs) after every query
-		assertEquals(3, ds.prepare(WelcomeServlet.getHighscorePlayerQuery())
-				.countEntities(FetchOptions.Builder.withLimit(10)));
+		assertEquals(3,
+				ds.prepare(HighscoreCalculator.getHighscorePlayerQuery())
+						.countEntities(FetchOptions.Builder.withLimit(10)));
 
 	}
 
 	private void test3PlayersThirdApplied(DatastoreService ds) {
 		// first global query only sees first an third Entity
-		assertEquals(1, ds.prepare(WelcomeServlet.getHighscorePlayerQuery())
-				.countEntities(FetchOptions.Builder.withLimit(10)));
+		assertEquals(1,
+				ds.prepare(HighscoreCalculator.getHighscorePlayerQuery())
+						.countEntities(FetchOptions.Builder.withLimit(10)));
 		// second global query sees all three Entities because we "groom"
 		// (attempt to
 		// apply unapplied jobs) after every query
-		assertEquals(2, ds.prepare(WelcomeServlet.getHighscorePlayerQuery())
-				.countEntities(FetchOptions.Builder.withLimit(10)));
+		assertEquals(2,
+				ds.prepare(HighscoreCalculator.getHighscorePlayerQuery())
+						.countEntities(FetchOptions.Builder.withLimit(10)));
 
 	}
 
