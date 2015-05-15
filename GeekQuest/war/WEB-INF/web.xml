@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns="http://java.sun.com/xml/ns/javaee"
+xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
+	<servlet>
+		<servlet-name>GeekQuest</servlet-name>
+		<servlet-class>geek.GeekQuestServlet</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>Welcome</servlet-name>
+		<servlet-class>geek.WelcomeServlet</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>Serve</servlet-name>
+		<servlet-class>geek.Serve</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GeekQuest</servlet-name>
+		<url-pattern>/geekquest</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>Serve</servlet-name>
+		<url-pattern>/serve</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>Welcome</servlet-name>
+		<url-pattern>/welcome</url-pattern>
+	</servlet-mapping>
+	<welcome-file-list>
+	    <welcome-file>geekquest</welcome-file>
+	</welcome-file-list>
+</web-app>
