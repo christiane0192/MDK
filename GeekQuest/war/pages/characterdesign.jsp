@@ -24,7 +24,7 @@ BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService(
     <td>Name:</td>
     <td><input type="text" size="30" maxlength="30" id="playername" name="playername" value="${pname}"></td>
   </tr>
-      <tr><td><a href="http://www.html-seminar.de/html-links.htm" id="link" name="link">Need help finding a good hobbit name?</a> </td></tr>
+      <tr><td><button type="submit" style="height: 30px; width: 250px;" id="link" name="link">Need help finding a good hobbit name?</button> </td></tr>
   <tr>
     <td>Character class:</td>
    <td><select name="character" id="character">
