@@ -58,7 +58,11 @@ public class WelcomeServlet extends HttpServlet {
 
 		initialize();
 		List<Entity> highscorePlayer = calculator.computeHighscore();
-
+		String value = req.getParameter("link");
+		if (value != null
+				&& value.equals("Need help finding a good hobbit name?")) {
+			resp.sendRedirect("/namehelper");
+		}
 		if (hasToSavePlayer(req)) {
 			Entity player = getPlayer(req, resp);
 			saveEntity(player);

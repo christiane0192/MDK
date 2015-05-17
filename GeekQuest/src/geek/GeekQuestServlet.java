@@ -41,78 +41,79 @@ public class GeekQuestServlet extends HttpServlet {
 			throws IOException {
 
 		initializeData();
-		
-		//generate test data in databasae
-//		putHighscorePlayerToDatabase();
-//		generateMissions();
 
-		if(user==null){
-				resp.sendRedirect(userService.createLoginURL(req.getRequestURI()));
-			}
-		else{
-			if(hasCharacter(user)){
-				if(userWantsToEditData(req)){
-					//set player data in view
+		// generate test data in databasae
+		// putHighscorePlayerToDatabase();
+		// generateMissions();
+
+		if (user == null) {
+			resp.sendRedirect(userService.createLoginURL(req.getRequestURI()));
+		} else {
+			if (hasCharacter(user)) {
+				if (userWantsToEditData(req)) {
+					// set player data in view
 					handleEditCharacter(req, resp);
+				} else {
+					resp.sendRedirect("/welcome");
 				}
-				else{
-				resp.sendRedirect("/welcome");
-				}
-			}else{
+			} else {
 				handleUserHasNoCharacter(req, resp);
 			}
 		}
 	}
 
-	public void initializeData(){
+	public void initializeData() {
 		datastore = DatastoreServiceFactory.getDatastoreService();
 		userService = UserServiceFactory.getUserService();
 		user = userService.getCurrentUser();
 	}
-	
-	public void handleEditCharacter(HttpServletRequest req, HttpServletResponse resp){
+
+	public void handleEditCharacter(HttpServletRequest req,
+			HttpServletResponse resp) {
 		setPlayerAttributesInView(req);
 		dispatchRequest(req, resp, "/pages/characterdesign.jsp");
 	}
-	
-	public void setPlayerAttributesInView(HttpServletRequest req){
+
+	public void setPlayerAttributesInView(HttpServletRequest req) {
 		Entity player = getPlayerFromDatabase();
-		req.setAttribute("pname", player.getProperty("playername"));
+		if (req.getAttribute("hobbitname") != null) {
+			req.setAttribute("pname", req.getAttribute("hobbitname"));
+		} else {
+			req.setAttribute("pname", player.getProperty("playername"));
+		}
 		List<Entity> missions = getAllMissions();
 		List<Entity> playerMissions = getPlayerMissionsFromEmbedded(player);
-		for(int i=0; i<missions.size();i++){
+		for (int i = 0; i < missions.size(); i++) {
 			Entity mission = missions.get(i);
-			for(Entity playerMission: playerMissions){
-				if(playerMission.getKey().equals(mission.getKey())){
+			for (Entity playerMission : playerMissions) {
+				if (playerMission.getKey().equals(mission.getKey())) {
 					mission.setProperty("isset", true);
 				}
 			}
-			if(mission.getProperty("isset")==null){
-					mission.setProperty("isset", false);
+			if (mission.getProperty("isset") == null) {
+				mission.setProperty("isset", false);
 			}
 		}
 		req.setAttribute("missions", missions);
 		String[] charclasses = Charclass.names();
-		String[] newCharclasses= new String[Charclass.names().length];
+		String[] newCharclasses = new String[Charclass.names().length];
 		int index = 1;
-		newCharclasses[0]= (String) player.getProperty("character");
-		for(String charclass:charclasses){
-			if(!charclass.equals(player.getProperty("character"))){
-				newCharclasses[index]=charclass;
+		if (req.getAttribute("hobbitname") != null) {
+			newCharclasses[0] = "HOBBIT";
+		} else {
+			newCharclasses[0] = (String) player.getProperty("character");
+		}
+
+		for (String charclass : charclasses) {
+			if (!charclass.equals(newCharclasses[0])) {
+				newCharclasses[index] = charclass;
 				index++;
 			}
 		}
 		req.setAttribute("characters", newCharclasses);
 		req.setAttribute("user", user);
-//		req.setAttribute("character", player.getProperty("character"));
-//		req.setAttribute("health", player.getProperty("health"));
-//		req.setAttribute("missions", getPlayerMissionsFromEmbedded(player));
-//		// req.setAttribute("fileurl",
-//		// getUpoadedFileURL((String)player.getProperty("fileblobkey")));
-//		req.setAttribute("fileurl", player.getProperty("fileurl"));
-//		req.setAttribute("user", user.getEmail());
 	}
-	
+
 	public ArrayList<Entity> getPlayerMissionsFromEmbedded(Entity player) {
 		ArrayList<Entity> missions = new ArrayList<Entity>();
 		ArrayList<EmbeddedEntity> embeddedMissions = (ArrayList<EmbeddedEntity>) player
@@ -128,7 +129,7 @@ public class GeekQuestServlet extends HttpServlet {
 		}
 		return missions;
 	}
-	
+
 	public Entity getPlayerFromDatabase() {
 		Query q = new Query("Player");
 		Filter userFilter = new FilterPredicate("email", FilterOperator.EQUAL,
@@ -139,58 +140,63 @@ public class GeekQuestServlet extends HttpServlet {
 		return entity;
 	}
 
-	public boolean hasCharacter(User user){
+	public boolean hasCharacter(User user) {
 		Query q = new Query("Player");
-		Filter userFilter =  new FilterPredicate("email", FilterOperator.EQUAL, user.getEmail());
+		Filter userFilter = new FilterPredicate("email", FilterOperator.EQUAL,
+				user.getEmail());
 		q.setFilter(userFilter);
 		PreparedQuery pq = datastore.prepare(q);
-		Entity entity= pq.asSingleEntity();
-		return entity!=null;
-	}
-	
-	public boolean userWantsToEditData(HttpServletRequest req){
-		return req.getParameter("edit")!=null;
+		Entity entity = pq.asSingleEntity();
+		return entity != null;
 	}
 
-	public void handleUserHasNoCharacter(HttpServletRequest req, HttpServletResponse resp){
+	public boolean userWantsToEditData(HttpServletRequest req) {
+		return req.getParameter("edit") != null
+				|| req.getAttribute("edit") != null;
+	}
 
-			if(!areMissionsSetInGUI(req)){
-				List<Entity> missions = getAllMissions();
-				for(Entity mission: missions){
-					mission.setProperty("isset", false);
-				}
-				req.setAttribute("missions", missions);
-				req.setAttribute("characters", Charclass.names());
-				req.setAttribute("user", user);
-				dispatchRequest(req, resp, "/pages/characterdesign.jsp");
+	public void handleUserHasNoCharacter(HttpServletRequest req,
+			HttpServletResponse resp) {
+
+		if (!areMissionsSetInGUI(req)) {
+			List<Entity> missions = getAllMissions();
+			for (Entity mission : missions) {
+				mission.setProperty("isset", false);
 			}
+			req.setAttribute("missions", missions);
+			req.setAttribute("characters", Charclass.names());
+			req.setAttribute("user", user);
+			dispatchRequest(req, resp, "/pages/characterdesign.jsp");
+		}
 	}
 
-
-	public boolean areMissionsSetInGUI(HttpServletRequest req){
-		return req.getAttribute("missions")!=null && !req.getAttribute("missions").equals("");
+	public boolean areMissionsSetInGUI(HttpServletRequest req) {
+		return req.getAttribute("missions") != null
+				&& !req.getAttribute("missions").equals("");
 	}
 
-	public void dispatchRequest(HttpServletRequest req, HttpServletResponse resp, String forwardedFile){
-		RequestDispatcher rd = getServletContext().getRequestDispatcher(forwardedFile);
+	public void dispatchRequest(HttpServletRequest req,
+			HttpServletResponse resp, String forwardedFile) {
+		RequestDispatcher rd = getServletContext().getRequestDispatcher(
+				forwardedFile);
 		try {
 			rd.forward(req, resp);
 		} catch (ServletException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
-	public List<Entity> generateMissions(){
-		List<Entity> missions= new ArrayList<Entity>();
+	public List<Entity> generateMissions() {
+		List<Entity> missions = new ArrayList<Entity>();
 
 		String kindDestroyRing = "Mission";
 		String nameDestroyRing = "Destroying Ring";
-		Key keyDestroyRing = KeyFactory.createKey(kindDestroyRing, nameDestroyRing);
+		Key keyDestroyRing = KeyFactory.createKey(kindDestroyRing,
+				nameDestroyRing);
 		Entity missionDestroyRing = new Entity(keyDestroyRing);
 		missionDestroyRing.setProperty("description", "Destroying Ring");
 		missionDestroyRing.setProperty("isAccomplished", false);
@@ -199,7 +205,8 @@ public class GeekQuestServlet extends HttpServlet {
 
 		String kindVisitRivendell = "Mission";
 		String nameVisitRivendell = "Visit Rivendell";
-		Key keyVisitRivendell = KeyFactory.createKey(kindVisitRivendell, nameVisitRivendell);
+		Key keyVisitRivendell = KeyFactory.createKey(kindVisitRivendell,
+				nameVisitRivendell);
 		Entity missionVisitRivendell = new Entity(keyVisitRivendell);
 		missionVisitRivendell.setProperty("description", "Visit Rivendell");
 		missionVisitRivendell.setProperty("isAccomplished", false);
@@ -208,10 +215,9 @@ public class GeekQuestServlet extends HttpServlet {
 
 		return missions;
 
-
 	}
 
-	public void putHighscorePlayerToDatabase(){
+	public void putHighscorePlayerToDatabase() {
 		String kindPlayer = "Player";
 
 		String emailPlayer1 = "email1@test.de";
@@ -316,8 +322,8 @@ public class GeekQuestServlet extends HttpServlet {
 
 	}
 
-	public List<Entity> getAllMissions(){
-		Query q= new Query("Mission");
+	public List<Entity> getAllMissions() {
+		Query q = new Query("Mission");
 		PreparedQuery pq = datastore.prepare(q);
 		List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(5));
 		return result;
