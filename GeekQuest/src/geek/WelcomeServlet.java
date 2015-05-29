@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,7 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.EmbeddedEntity;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
@@ -41,6 +43,7 @@ import com.google.appengine.api.memcache.jsr107cache.GCacheFactory;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import com.google.appengine.api.datastore.Transaction;
 
 @SuppressWarnings("serial")
 public class WelcomeServlet extends HttpServlet {
@@ -64,13 +67,31 @@ public class WelcomeServlet extends HttpServlet {
 			resp.sendRedirect("/namehelper");
 		}
 		if (hasToSavePlayer(req)) {
-			Entity player = getPlayer(req, resp);
-			saveEntity(player);
-			if (hasPlayerAllProperties(player)) {
-				setRequestParameter(req, player);
-				setHighscore(req, highscorePlayer);
-			} else {
-				resp.sendRedirect("/geekquest");
+			int retries = 3;
+			while (true) {
+				Transaction txn = datastore.beginTransaction();
+				try {
+					Entity player = getPlayer(req, resp);
+					saveEntity(player);
+					txn.commit();
+					if (hasPlayerAllProperties(player)) {
+						setRequestParameter(req, player);
+						setHighscore(req, highscorePlayer);
+					} else {
+						resp.sendRedirect("/geekquest");
+					}
+					break;
+				} catch (ConcurrentModificationException e) {
+					if (retries == 0) {
+						throw e;
+					}
+					// Allow retry to occur
+					--retries;
+				} finally {
+					if (txn.isActive()) {
+						txn.rollback();
+					}
+				}
 			}
 		} else {
 			Entity player = getPlayerFromDatabase();
@@ -90,10 +111,28 @@ public class WelcomeServlet extends HttpServlet {
 		if (userWantsToLogout(req)) {
 			resp.sendRedirect(createLogoutURL());
 		} else if (userSetsNewScore(req)) {
-			Entity player = setNewHighscoreForPlayer(req);
-			List<Entity> resultHighscore = calculator
-					.handleNewHighscore(player);
-			setViewData(req, resultHighscore);
+			int retries = 3;
+			while (true) {
+				Transaction txn = datastore.beginTransaction();
+				try {
+					Entity player = setNewHighscoreForPlayer(req);
+					List<Entity> resultHighscore = calculator
+							.handleNewHighscore(player);
+					txn.commit();
+					setViewData(req, resultHighscore);
+					break;
+				} catch (ConcurrentModificationException e) {
+					if (retries == 0) {
+						throw e;
+					}
+					// Allow retry to occur
+					--retries;
+				} finally {
+					if (txn.isActive()) {
+						txn.rollback();
+					}
+				}
+			}
 		} else if (userWantsToEditCharacter(req)) {
 			req.setAttribute("edit", req.getParameter("edit"));
 			forwardedFile = "/geekquest";
@@ -219,6 +258,10 @@ public class WelcomeServlet extends HttpServlet {
 		player.setProperty("character", req.getParameter("character"));
 		player.setProperty("health", getHealth());
 		player.setProperty("email", user.getEmail());
+		Long score = getScore();
+		if (score != null) {
+			player.setProperty("score", score);
+		}
 		// player.setProperty("fileblobkey", getBlobKey(req, resp));
 		player.setProperty("fileurl", getUpoadedFileURL(req, resp));
 		// setzen der missions
@@ -278,19 +321,39 @@ public class WelcomeServlet extends HttpServlet {
 		}
 	}
 
+	public Long getScore() {
+		if (hasCharacter()) {
+			Entity player = getPlayerFromDatabase();
+			return (Long) player.getProperty("score");
+		} else {
+			return null;
+		}
+	}
+
 	public boolean hasCharacter() {
 		Entity entity = getPlayerFromDatabase();
 		return entity != null;
 	}
 
 	public Entity getPlayerFromDatabase() {
-		Query q = new Query("Player");
-		Filter userFilter = new FilterPredicate("email", FilterOperator.EQUAL,
-				user.getEmail());
-		q.setFilter(userFilter);
-		PreparedQuery pq = datastore.prepare(q);
-		Entity entity = pq.asSingleEntity();
-		return entity;
+		// Query q = new Query("Player");
+		// Filter userFilter = new FilterPredicate("email",
+		// FilterOperator.EQUAL,
+		// user.getEmail());
+		// q.setFilter(userFilter);
+		// PreparedQuery pq = datastore.prepare(q);
+
+		// Entity entity = pq.asSingleEntity();
+		Key key = KeyFactory.createKey("Player", user.getEmail());
+		Entity entity;
+		try {
+			entity = datastore.get(key);
+			return entity;
+		} catch (EntityNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	// falls User seinen Account loeschen will

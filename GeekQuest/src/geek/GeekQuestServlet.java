@@ -17,6 +17,7 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.EmbeddedEntity;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
@@ -27,6 +28,7 @@ import com.google.appengine.api.urlfetch.HTTPResponse;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import com.google.apphosting.api.DatastorePb.Transaction;
 
 import entities.Charclass;
 
@@ -131,13 +133,24 @@ public class GeekQuestServlet extends HttpServlet {
 	}
 
 	public Entity getPlayerFromDatabase() {
-		Query q = new Query("Player");
-		Filter userFilter = new FilterPredicate("email", FilterOperator.EQUAL,
-				user.getEmail());
-		q.setFilter(userFilter);
-		PreparedQuery pq = datastore.prepare(q);
-		Entity entity = pq.asSingleEntity();
-		return entity;
+		// Query q = new Query("Player");
+		// Filter userFilter = new FilterPredicate("email",
+		// FilterOperator.EQUAL,
+		// user.getEmail());
+		// q.setFilter(userFilter);
+		// PreparedQuery pq = datastore.prepare(q);
+		// Entity entity = pq.asSingleEntity();
+		// return entity;
+		Key key = KeyFactory.createKey("Player", user.getEmail());
+		Entity entity;
+		try {
+			entity = datastore.get(key);
+			return entity;
+		} catch (EntityNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	public boolean hasCharacter(User user) {

@@ -22,7 +22,7 @@ BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService(
 <table>
   <tr>
     <td>Name:</td>
-    <td><input type="text" size="30" maxlength="30" id="playername" name="playername" value="${pname}"></td>
+    <td><input type="text" size="30" maxlength="60" id="playername" name="playername" value="${pname}"></td>
   </tr>
       <tr><td><input type="submit" style="height: 30px; width: 250px;" id="link" name="link" value="Need help finding a good hobbit name?" /> </td></tr>
   <tr>
