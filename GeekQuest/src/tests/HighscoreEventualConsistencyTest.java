@@ -1,6 +1,9 @@
 package tests;
 
+import static com.googlecode.objectify.ObjectifyService.ofy;
 import static org.junit.Assert.*;
+import entities.Charclass;
+import entities.Player;
 import geek.HighscoreCalculator;
 
 import java.util.List;
@@ -17,6 +20,7 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.dev.HighRepJobPolicy;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
@@ -25,9 +29,12 @@ public class HighscoreEventualConsistencyTest {
 
 	DatastoreService datastore;
 
-	private List<Entity> expectedResult;
+	// private List<Entity> expectedResult;
+	//
+	// Entity player;
+	private List<Player> expectedResult;
 
-	Entity player;
+	Player player;
 
 	public static final class Policy implements HighRepJobPolicy {
 		static boolean shouldApply = false;
@@ -76,19 +83,20 @@ public class HighscoreEventualConsistencyTest {
 		Policy.applyNone();
 
 		HighscoreCalculator calculator = new HighscoreCalculator();
-		List<Entity> actualHighscore = calculator.handleNewHighscore(player);
+		// List<Entity> actualHighscore = calculator.handleNewHighscore(player);
+		List<Player> actualHighscore = calculator.handleNewHighscore(player);
 
-		for (Entity result : expectedResult) {
-			System.out.println(result.getProperty("playername") + "  "
-					+ result.getProperty("score"));
-		}
+		// for (Entity result : expectedResult) {
+		// System.out.println(result.getProperty("playername") + "  "
+		// + result.getProperty("score"));
+		// }
 
-		System.out.println();
-		System.out.println();
+		// System.out.println();
+		// System.out.println();
 
-		for (Entity result : actualHighscore) {
-			System.out.println(result.getProperty("playername") + "  "
-					+ result.getProperty("score"));
+		// for (Entity result : actualHighscore) {
+		for (Player result : actualHighscore) {
+			System.out.println(result.getName() + "  " + result.getScore());
 		}
 
 		assertEquals(expectedResult, actualHighscore);
@@ -101,29 +109,41 @@ public class HighscoreEventualConsistencyTest {
 		Policy.applyAll();
 
 		HighscoreCalculator calculator = new HighscoreCalculator();
-		List<Entity> actualHighscore = calculator.handleNewHighscore(player);
+		// List<Entity> actualHighscore = calculator.handleNewHighscore(player);
+		List<Player> actualHighscore = calculator.handleNewHighscore(player);
 
-		for (Entity result : expectedResult) {
-			System.out.println(result.getProperty("playername") + "  "
-					+ result.getProperty("score"));
+		// for (Entity result : expectedResult) {
+		for (Player result : expectedResult) {
+			// System.out.println(result.getProperty("playername") + "  "
+			// + result.getProperty("score"));
+			System.out.println(result.getName() + "  " + result.getScore());
 		}
 
 		System.out.println();
 		System.out.println();
 
-		for (Entity result : actualHighscore) {
-			System.out.println(result.getProperty("playername") + "  "
-					+ result.getProperty("score"));
+		// for (Entity result : actualHighscore) {
+		// System.out.println(result.getProperty("playername") + "  "
+		// + result.getProperty("score"));
+		// }
+		for (Player result : actualHighscore) {
+			// System.out.println(result.getProperty("playername") + "  "
+			// + result.getProperty("score"));
+			System.out.println(result.getName() + "  " + result.getScore());
 		}
 
 		assertEquals(expectedResult, actualHighscore);
 
 	}
 
-	private List<Entity> getExpectedHighscoreList(Entity player) {
-		Query q = HighscoreCalculator.getHighscorePlayerQuery();
-		PreparedQuery pq = datastore.prepare(q);
-		List<Entity> results = pq.asList(FetchOptions.Builder.withLimit(10));
+	private List<Player> getExpectedHighscoreList(Player player) {
+		// private List<Entity> getExpectedHighscoreList(Entity player) {
+		// Query q = HighscoreCalculator.getHighscorePlayerQuery();
+		// PreparedQuery pq = datastore.prepare(q);
+		// List<Entity> results = pq.asList(FetchOptions.Builder.withLimit(10));
+
+		List<Player> results = ofy().load().type(Player.class).order("score")
+				.limit(10).list();
 
 		results.add(2, player);
 		results.remove(10);
@@ -237,17 +257,26 @@ public class HighscoreEventualConsistencyTest {
 
 	}
 
-	private Entity getTestCharacter() {
-		String kindPlayer = "Player";
+	private Player getTestCharacter() {
+		// private Entity getTestCharacter() {
+		// String kindPlayer = "Player";
+		//
+		// String emailPlayer = "JUnit@test.de";
+		// Key keyPlayer = KeyFactory.createKey(kindPlayer, emailPlayer);
+		// Entity player = new Entity(keyPlayer);
+		// player.setProperty("playername", "Frodo");
+		// player.setProperty("character", "Hobbit");
+		// player.setProperty("health", 25);
+		// player.setProperty("email", emailPlayer);
+		// player.setProperty("score", 527l);
 
-		String emailPlayer = "JUnit@test.de";
-		Key keyPlayer = KeyFactory.createKey(kindPlayer, emailPlayer);
-		Entity player = new Entity(keyPlayer);
-		player.setProperty("playername", "Frodo");
-		player.setProperty("character", "Hobbit");
-		player.setProperty("health", 25);
-		player.setProperty("email", emailPlayer);
-		player.setProperty("score", 527l);
+		Player player = new Player();
+		player.setName("Frodo");
+		player.setCharclass(Charclass.HOBBIT);
+		player.setHealth(25);
+		player.setEmail("JUnit@test.de");
+		player.setScore(527l);
+
 		return player;
 
 	}

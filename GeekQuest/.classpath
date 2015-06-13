@@ -7,7 +7,13 @@
 	<classpathentry kind="var" path="APP_ENGINE_API"/>
 	<classpathentry kind="var" path="APP_ENGINE_LABS"/>
 	<classpathentry kind="var" path="APP_ENGINE_LOCAL_RUNTIME"/>
-	<classpathentry kind="var" path="APP_ENGINE_STUBS"/>
-	<classpathentry kind="var" path="APP_ENGINE_TESTING"/>
+	<classpathentry kind="lib" path="C:/Users/Christiane/Desktop/Studium/eclipse-java-luna-SR2-win32/eclipse/plugins/com.google.appengine.eclipse.sdkbundle_1.9.18/appengine-java-sdk-1.9.18/lib/user/appengine-api-1.0-sdk-1.9.18.jar" sourcepath="C:/Users/Christiane/Desktop/Studium/eclipse-java-luna-SR2-win32/eclipse/plugins/com.google.appengine.eclipse.sdkbundle_1.9.18/appengine-java-sdk-1.9.18/src/user/appengine-api-1.0-sdk-1.9.18-src.zip">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/C:/Users/Christiane/Desktop/Studium/eclipse-java-luna-SR2-win32/eclipse/plugins/com.google.appengine.eclipse.sdkbundle_1.9.18/appengine-java-sdk-1.9.18/docs/javadoc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/objectify-5.1.5.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Christiane/Desktop/Studium/Master Software Engineering/1. Semester/MDK/appengine-java-sdk-1.9.18/appengine-java-sdk-1.9.18/lib/testing/appengine-testing.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Christiane/Desktop/Studium/Master Software Engineering/1. Semester/MDK/appengine-java-sdk-1.9.18/appengine-java-sdk-1.9.18/lib/impl/appengine-api-stubs.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

@@ -30,14 +30,14 @@
 <h2>Your currently activated Missions:</h2>
 <table>
 <c:forEach items="${missions}" var="mission">
-	<tr><td>${mission.properties.description}</td></tr>
+	<tr><td>${mission.description}</td></tr>
 </c:forEach>
 </table>
 <h2>Highscore</h2>
 <table>
 <c:forEach items="${highscores}" var="highscore">
-	<tr><td>${highscore.properties.playername}</td>
-	<td>${highscore.properties.score}</td></tr>
+	<tr><td>${highscore.name}</td>
+	<td>${highscore.score}</td></tr>
 </c:forEach>
 </table>
 <form action="/welcome">

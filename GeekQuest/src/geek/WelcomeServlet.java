@@ -1,5 +1,7 @@
 package geek;
 
+import static com.googlecode.objectify.ObjectifyService.ofy;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,14 +46,20 @@ import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.api.datastore.Transaction;
+import com.googlecode.objectify.Ref;
+
+import entities.Charclass;
+import entities.Mission;
+import entities.Player;
 
 @SuppressWarnings("serial")
 public class WelcomeServlet extends HttpServlet {
 
-	private DatastoreService datastore;
+	// private DatastoreService datastore;
 	private UserService userService;
 	private User user;
-	private final String INITIAL_HEALTH = "10";
+	private final Long INITIAL_HEALTH = 10l;
+	// private final String INITIAL_HEALTH = "10";
 	private BlobstoreService blobstoreService = BlobstoreServiceFactory
 			.getBlobstoreService();
 	private HighscoreCalculator calculator;
@@ -60,41 +68,44 @@ public class WelcomeServlet extends HttpServlet {
 			throws IOException {
 
 		initialize();
-		List<Entity> highscorePlayer = calculator.computeHighscore();
+		// List<Entity> highscorePlayer = calculator.computeHighscore();
+		List<Player> highscorePlayer = calculator.computeHighscore();
 		String value = req.getParameter("link");
 		if (value != null
 				&& value.equals("Need help finding a good hobbit name?")) {
 			resp.sendRedirect("/namehelper");
 		}
 		if (hasToSavePlayer(req)) {
-			int retries = 3;
-			while (true) {
-				Transaction txn = datastore.beginTransaction();
-				try {
-					Entity player = getPlayer(req, resp);
-					saveEntity(player);
-					txn.commit();
-					if (hasPlayerAllProperties(player)) {
-						setRequestParameter(req, player);
-						setHighscore(req, highscorePlayer);
-					} else {
-						resp.sendRedirect("/geekquest");
-					}
-					break;
-				} catch (ConcurrentModificationException e) {
-					if (retries == 0) {
-						throw e;
-					}
-					// Allow retry to occur
-					--retries;
-				} finally {
-					if (txn.isActive()) {
-						txn.rollback();
-					}
-				}
+			// int retries = 3;
+			// while (true) {
+			// Transaction txn = datastore.beginTransaction();
+			// try {
+			// Entity player = getPlayer(req, resp);
+			Player player = getPlayer(req, resp);
+			saveEntity(player);
+			// txn.commit();
+			if (hasPlayerAllProperties(player)) {
+				setRequestParameter(req, player);
+				setHighscore(req, highscorePlayer);
+			} else {
+				resp.sendRedirect("/geekquest");
 			}
+			// break;
+			// } catch (ConcurrentModificationException e) {
+			// if (retries == 0) {
+			// throw e;
+			// }
+			// // Allow retry to occur
+			// --retries;
+			// } finally {
+			// if (txn.isActive()) {
+			// txn.rollback();
+			// }
+			// }
+			// }
 		} else {
-			Entity player = getPlayerFromDatabase();
+			// Entity player = getPlayerFromDatabase();
+			Player player = getPlayerFromDatabase();
 			if (hasPlayerAllProperties(player)) {
 				setRequestParameter(req, player);
 				setHighscore(req, highscorePlayer);
@@ -111,40 +122,44 @@ public class WelcomeServlet extends HttpServlet {
 		if (userWantsToLogout(req)) {
 			resp.sendRedirect(createLogoutURL());
 		} else if (userSetsNewScore(req)) {
-			int retries = 3;
-			while (true) {
-				Transaction txn = datastore.beginTransaction();
-				try {
-					Entity player = setNewHighscoreForPlayer(req);
-					List<Entity> resultHighscore = calculator
-							.handleNewHighscore(player);
-					txn.commit();
-					setViewData(req, resultHighscore);
-					break;
-				} catch (ConcurrentModificationException e) {
-					if (retries == 0) {
-						throw e;
-					}
-					// Allow retry to occur
-					--retries;
-				} finally {
-					if (txn.isActive()) {
-						txn.rollback();
-					}
-				}
-			}
+			// int retries = 3;
+			// while (true) {
+			// Transaction txn = datastore.beginTransaction();
+			// try {
+			// Entity player = setNewHighscoreForPlayer(req);
+			Player player = setNewHighscoreForPlayer(req);
+			// List<Entity> resultHighscore = calculator
+			// .handleNewHighscore(player);
+			List<Player> resultHighscore = calculator
+					.handleNewHighscore(player);
+			// txn.commit();
+			setViewData(req, resultHighscore);
+			// break;
+			// } catch (ConcurrentModificationException e) {
+			// if (retries == 0) {
+			// throw e;
+			// }
+			// // Allow retry to occur
+			// --retries;
+			// } finally {
+			// if (txn.isActive()) {
+			// txn.rollback();
+			// }
+			// }
+			// }
 		} else if (userWantsToEditCharacter(req)) {
 			req.setAttribute("edit", req.getParameter("edit"));
 			forwardedFile = "/geekquest";
 		} else {
-			List<Entity> highscorePlayer = calculator.computeHighscore();
+			// List<Entity> highscorePlayer = calculator.computeHighscore();
+			List<Player> highscorePlayer = calculator.computeHighscore();
 			setViewData(req, highscorePlayer);
 		}
 		dispatchRequest(req, resp, forwardedFile);
 	}
 
 	public void initialize() {
-		datastore = DatastoreServiceFactory.getDatastoreService();
+		// datastore = DatastoreServiceFactory.getDatastoreService();
 		userService = UserServiceFactory.getUserService();
 		user = userService.getCurrentUser();
 		calculator = new HighscoreCalculator();
@@ -154,25 +169,55 @@ public class WelcomeServlet extends HttpServlet {
 		return req.getParameter("edit") != null;
 	}
 
-	public Entity setNewHighscoreForPlayer(HttpServletRequest req) {
-		Entity player = getPlayerFromDatabase();
+	public Player setNewHighscoreForPlayer(HttpServletRequest req) {
+		// public Entity setNewHighscoreForPlayer(HttpServletRequest req) {
+		// Entity player = getPlayerFromDatabase();
+		// if (req.getParameter("newscore") != null) {
+		// player.setProperty("score",
+		// Long.valueOf(req.getParameter("newscore")));
+		// }
+		Player player = getPlayerFromDatabase();
+
 		if (req.getParameter("newscore") != null) {
-			player.setProperty("score",
-					Long.valueOf(req.getParameter("newscore")));
+
+			if (player.getScore() < Long.valueOf(req.getParameter("newscore"))) {
+				player.setScore(Long.valueOf(req.getParameter("newscore")));
+				saveEntity(player);
+			}
 		}
+
 		return player;
 	}
 
-	public void setViewData(HttpServletRequest req, List<Entity> highscorePlayer) {
-		Entity player = getPlayerFromDatabase();
+	public boolean hasHigherScore(Player playerHighscore,
+			Player playerChallenger) {
+
+		if ((new Long(playerChallenger.getScore())).compareTo(new Long(
+				playerHighscore.getScore())) > 0) {
+			return true;
+		}
+		return false;
+	}
+
+	public void setViewData(HttpServletRequest req, List<Player> highscorePlayer) {
+		// public void setViewData(HttpServletRequest req, List<Entity>
+		// highscorePlayer) {
+		// Entity player = getPlayerFromDatabase();
+		// if (hasPlayerAllProperties(player)) {
+		// setRequestParameter(req, player);
+		// setHighscore(req, highscorePlayer);
+		// }
+		Player player = getPlayerFromDatabase();
 		if (hasPlayerAllProperties(player)) {
 			setRequestParameter(req, player);
 			setHighscore(req, highscorePlayer);
 		}
 	}
 
+	// public void setHighscore(HttpServletRequest req,
+	// List<Entity> highscorePlayer) {
 	public void setHighscore(HttpServletRequest req,
-			List<Entity> highscorePlayer) {
+			List<Player> highscorePlayer) {
 		req.setAttribute("highscores", highscorePlayer);
 	}
 
@@ -199,26 +244,42 @@ public class WelcomeServlet extends HttpServlet {
 		return req.getParameter("newscore") != null;
 	}
 
-	public void setRequestParameter(HttpServletRequest req, Entity player) {
+	public void setRequestParameter(HttpServletRequest req, Player player) {
+		// public void setRequestParameter(HttpServletRequest req, Entity
+		// player) {
 
-		req.setAttribute("playername", player.getProperty("playername"));
-		req.setAttribute("character", player.getProperty("character"));
-		req.setAttribute("health", player.getProperty("health"));
-		req.setAttribute("missions", getPlayerMissionsFromEmbedded(player));
-		// req.setAttribute("fileurl",
-		// getUpoadedFileURL((String)player.getProperty("fileblobkey")));
-		req.setAttribute("fileurl", player.getProperty("fileurl"));
+		// req.setAttribute("playername", player.getProperty("playername"));
+		// req.setAttribute("character", player.getProperty("character"));
+		// req.setAttribute("health", player.getProperty("health"));
+		// req.setAttribute("missions", getPlayerMissionsFromEmbedded(player));
+		// req.setAttribute("fileurl", player.getProperty("fileurl"));
+		// req.setAttribute("user", user.getEmail());
+
+		req.setAttribute("playername", player.getName());
+		req.setAttribute("character", player.getCharclass().toString());
+		req.setAttribute("health", player.getHealth());
+		req.setAttribute("missions", getPlayerMissions(player));
+		req.setAttribute("fileurl", player.getPhoto());
 		req.setAttribute("user", user.getEmail());
 	}
 
-	public boolean hasPlayerAllProperties(Entity player) {
-		return player.getProperty("playername") != null
-				&& !player.getProperty("playername").equals("")
-				&& player.getProperty("character") != null
-				&& player.getProperty("health") != null
-				&& !player.getProperty("health").equals("")
-				&& player.getProperty("email") != null
-				&& !player.getProperty("email").equals("");
+	public List<Mission> getPlayerMissions(Player player) {
+		List<Ref<Mission>> refs = player.getMissions();
+		Collection<Mission> missions = ofy().load().refs(refs).values();
+		return new ArrayList<Mission>(missions);
+	}
+
+	public boolean hasPlayerAllProperties(Player player) {
+		// public boolean hasPlayerAllProperties(Entity player) {
+		// return player.getProperty("playername") != null
+		// && !player.getProperty("playername").equals("")
+		// && player.getProperty("character") != null
+		// && player.getProperty("health") != null
+		// && !player.getProperty("health").equals("")
+		// && player.getProperty("email") != null
+		// && !player.getProperty("email").equals("");
+		return player.getName() != null && player.getCharclass() != null
+				&& player.getEmail() != null;
 	}
 
 	// public boolean hasFileUpoaded(HttpServletRequest req, HttpServletResponse
@@ -250,35 +311,59 @@ public class WelcomeServlet extends HttpServlet {
 				&& !req.getParameter("playername").equals("");
 	}
 
-	public Entity getPlayer(HttpServletRequest req, HttpServletResponse resp) {
-		Key key = getKey("Player", user.getEmail());
+	public Player getPlayer(HttpServletRequest req, HttpServletResponse resp) {
+		// public Entity getPlayer(HttpServletRequest req, HttpServletResponse
+		// resp) {
+		// Key key = getKey("Player", user.getEmail());
+		//
+		// Entity player = new Entity(key);
+		// player.setProperty("playername", req.getParameter("playername"));
+		// player.setProperty("character", req.getParameter("character"));
+		// player.setProperty("health", getHealth());
+		// player.setProperty("email", user.getEmail());
+		// Long score = getScore();
+		// if (score != null) {
+		// player.setProperty("score", score);
+		// }
+		// // player.setProperty("fileblobkey", getBlobKey(req, resp));
+		// player.setProperty("fileurl", getUpoadedFileURL(req, resp));
+		// // setzen der missions
+		// ArrayList<Entity> selectedMissions = getSelectedMissions(req);
+		// ArrayList<EmbeddedEntity> selectedEmbeddedMissions = new
+		// ArrayList<EmbeddedEntity>();
+		// for (Entity mission : selectedMissions) {
+		// EmbeddedEntity embeddedMission = new EmbeddedEntity();
+		// Key infoKey;
+		//
+		// infoKey = mission.getKey();
+		// embeddedMission.setKey(infoKey);
+		// embeddedMission.setPropertiesFrom(mission);
+		//
+		// selectedEmbeddedMissions.add(embeddedMission);
+		// }
+		//
+		// player.setProperty("missions", selectedEmbeddedMissions);
+		// return player;
 
-		Entity player = new Entity(key);
-		player.setProperty("playername", req.getParameter("playername"));
-		player.setProperty("character", req.getParameter("character"));
-		player.setProperty("health", getHealth());
-		player.setProperty("email", user.getEmail());
+		Player player = new Player();
+		player.setName(req.getParameter("playername"));
+		Charclass charclass = null;
+		for (Charclass chclass : Charclass.values()) {
+			if (req.getParameter("character").equals(chclass.toString())) {
+				charclass = chclass;
+			}
+		}
+		player.setCharclass(charclass);
+		player.setHealth(getHealth());
+		player.setEmail(user.getEmail());
 		Long score = getScore();
 		if (score != null) {
-			player.setProperty("score", score);
+			player.setScore(score);
 		}
-		// player.setProperty("fileblobkey", getBlobKey(req, resp));
-		player.setProperty("fileurl", getUpoadedFileURL(req, resp));
+		player.setPhoto(getUpoadedFileURL(req, resp));
 		// setzen der missions
-		ArrayList<Entity> selectedMissions = getSelectedMissions(req);
-		ArrayList<EmbeddedEntity> selectedEmbeddedMissions = new ArrayList<EmbeddedEntity>();
-		for (Entity mission : selectedMissions) {
-			EmbeddedEntity embeddedMission = new EmbeddedEntity();
-			Key infoKey;
-
-			infoKey = mission.getKey();
-			embeddedMission.setKey(infoKey);
-			embeddedMission.setPropertiesFrom(mission);
-
-			selectedEmbeddedMissions.add(embeddedMission);
-		}
-
-		player.setProperty("missions", selectedEmbeddedMissions);
+		ArrayList<Ref<Mission>> selectedMissions = getSelectedMissions(req);
+		player.setMissions(selectedMissions);
 		return player;
 	}
 
@@ -292,30 +377,50 @@ public class WelcomeServlet extends HttpServlet {
 		return "";
 	}
 
-	public ArrayList<Entity> getSelectedMissions(HttpServletRequest req) {
-		ArrayList<Entity> selectedMissions = new ArrayList<Entity>();
-		List<Entity> allMissions = getAllMissions();
-		for (Entity mission : allMissions) {
+	public ArrayList<Ref<Mission>> getSelectedMissions(HttpServletRequest req) {
+		// public ArrayList<Entity> getSelectedMissions(HttpServletRequest req)
+		// {
+		// ArrayList<Entity> selectedMissions = new ArrayList<Entity>();
+		// List<Entity> allMissions = getAllMissions();
+		// for (Entity mission : allMissions) {
+		// String selected = req.getParameter("checkbox"
+		// + mission.getProperty("description"));
+		// if (selected != null && selected.equals("on")) {
+		// selectedMissions.add(mission);
+		// }
+		// }
+		// return selectedMissions;
+
+		List<Mission> allMissions = getAllMissions();
+		ArrayList<Ref<Mission>> selectedMissions = new ArrayList<Ref<Mission>>();
+		for (Mission mission : allMissions) {
 			String selected = req.getParameter("checkbox"
-					+ mission.getProperty("description"));
+					+ mission.getDescription());
 			if (selected != null && selected.equals("on")) {
-				selectedMissions.add(mission);
+				selectedMissions.add(Ref.create(mission));
 			}
 		}
+
 		return selectedMissions;
+
 	}
 
-	public List<Entity> getAllMissions() {
-		Query q = new Query("Mission");
-		PreparedQuery pq = datastore.prepare(q);
-		List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(5));
+	public List<Mission> getAllMissions() {
+		// public List<Entity> getAllMissions() {
+		// Query q = new Query("Mission");
+		// PreparedQuery pq = datastore.prepare(q);
+		// List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(5));
+		List<Mission> result = ofy().load().type(Mission.class).list();
 		return result;
 	}
 
-	public String getHealth() {
+	public Long getHealth() {
+		// public String getHealth() {
 		if (hasCharacter()) {
-			Entity player = getPlayerFromDatabase();
-			return (String) player.getProperty("health");
+			Player player = getPlayerFromDatabase();
+			// Entity player = getPlayerFromDatabase();
+			// return (String) player.getProperty("health");
+			return player.getHealth();
 		} else {
 			return INITIAL_HEALTH;
 		}
@@ -323,51 +428,55 @@ public class WelcomeServlet extends HttpServlet {
 
 	public Long getScore() {
 		if (hasCharacter()) {
-			Entity player = getPlayerFromDatabase();
-			return (Long) player.getProperty("score");
+			// Entity player = getPlayerFromDatabase();
+			Player player = getPlayerFromDatabase();
+			// return (Long) player.getProperty("score");
+			return player.getScore();
 		} else {
 			return null;
 		}
 	}
 
 	public boolean hasCharacter() {
-		Entity entity = getPlayerFromDatabase();
+		// Entity entity = getPlayerFromDatabase();
+		Player entity = getPlayerFromDatabase();
 		return entity != null;
 	}
 
-	public Entity getPlayerFromDatabase() {
-		// Query q = new Query("Player");
-		// Filter userFilter = new FilterPredicate("email",
-		// FilterOperator.EQUAL,
-		// user.getEmail());
-		// q.setFilter(userFilter);
-		// PreparedQuery pq = datastore.prepare(q);
+	public Player getPlayerFromDatabase() {
+		// public Entity getPlayerFromDatabase() {
+		// Key key = KeyFactory.createKey("Player", user.getEmail());
+		// Entity entity;
+		// try {
+		// entity = datastore.get(key);
+		// return entity;
+		// } catch (EntityNotFoundException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
+		// return null;
 
-		// Entity entity = pq.asSingleEntity();
-		Key key = KeyFactory.createKey("Player", user.getEmail());
-		Entity entity;
-		try {
-			entity = datastore.get(key);
-			return entity;
-		} catch (EntityNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
+		Player player = ofy().load().type(Player.class).id(user.getEmail())
+				.now();
+		return player;
 	}
 
 	// falls User seinen Account loeschen will
 	public void deleteUser() {
-		Key key = getKey("Player", user.getEmail());
-		datastore.delete(key);
+		// Key key = getKey("Player", user.getEmail());
+		// datastore.delete(key);
+		Player player = getPlayerFromDatabase();
+		ofy().delete().entity(player).now();
 	}
 
 	public Key getKey(String kind, String name) {
 		return KeyFactory.createKey(kind, name);
 	}
 
-	public void saveEntity(Entity entity) {
-		datastore.put(entity);
+	public void saveEntity(Player entity) {
+		// public void saveEntity(Entity entity) {
+		// datastore.put(entity);
+		ofy().save().entity(entity).now();
 	}
 
 	public void dispatchRequest(HttpServletRequest req,

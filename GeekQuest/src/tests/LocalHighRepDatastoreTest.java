@@ -1,6 +1,8 @@
 package tests;
 
+import static com.googlecode.objectify.ObjectifyService.ofy;
 import static org.junit.Assert.*;
+import entities.Player;
 import geek.HighscoreCalculator;
 import geek.WelcomeServlet;
 
@@ -48,11 +50,17 @@ public class LocalHighRepDatastoreTest {
 		player.setProperty("score", 1000);
 		ds.put(player);
 
-		assertEquals(0,
-				ds.prepare(HighscoreCalculator.getHighscorePlayerQuery())
-						.countEntities(FetchOptions.Builder.withLimit(10)));
-		assertEquals(1, ds.prepare(new Query(kindPlayer, keyPlayer))
-				.countEntities(FetchOptions.Builder.withLimit(10)));
+		// assertEquals(0,
+		// ds.prepare(HighscoreCalculator.getHighscorePlayerQuery())
+		// .countEntities(FetchOptions.Builder.withLimit(10)));
+		assertEquals(0, ofy().load().type(Player.class).order("score")
+				.limit(10).count());
+
+		// assertEquals(1, ds.prepare(new Query(kindPlayer, keyPlayer))
+		// .countEntities(FetchOptions.Builder.withLimit(10)));
+
+		assertEquals(1, ofy().load().type(Player.class).order("score")
+				.limit(10).count());
 
 	}
 

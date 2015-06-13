@@ -49,13 +49,13 @@ BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService(
    		</thead>
 	    <c:forEach items="${missions}" var="mission">
 	        <tr>
-	        	<td>${mission.properties.description}</td>
+	        	<td>${mission.description}</td>
 	        	<c:choose>
-				    <c:when test="${mission.properties.isset}">
-				      <td><input type="checkbox" name="checkbox${mission.properties.description}" checked /></td>
+				    <c:when test="${mission.isset}">
+				    <td><input type="checkbox" name="checkbox${mission.description}" checked /></td>
 				    </c:when>
 				    <c:otherwise>
-				        <td><input type="checkbox" name="checkbox${mission.properties.description}" /></td>
+				    <td><input type="checkbox" name="checkbox${mission.description}" /></td>
 				    </c:otherwise>
 				</c:choose>
 	        </tr>
