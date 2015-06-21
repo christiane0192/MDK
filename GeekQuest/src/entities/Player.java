@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Ref;
+import com.googlecode.objectify.annotation.AlsoLoad;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
@@ -16,18 +17,22 @@ public class Player {
 
 	@Id
 	private String email;
-	private String name;
+	@AlsoLoad("name")
+	private String nickname;
 	private Charclass charclass;
 	private long health;
 	private String photo;
 	private long score;
+	private long gold;
+	@Load
+	private List<Ref<Player>> mercenaries = new ArrayList<Ref<Player>>();
 	@Load
 	private List<Ref<Mission>> missions = new ArrayList<Ref<Mission>>();
 
 	public Player(String name, Charclass charclass, long health, String email,
 			String photo) {
 		super();
-		this.name = name;
+		this.nickname = name;
 		this.charclass = charclass;
 		this.health = health;
 		this.email = email;
@@ -55,11 +60,11 @@ public class Player {
 	}
 
 	public String getName() {
-		return name;
+		return nickname;
 	}
 
 	public void setName(String name) {
-		this.name = name;
+		this.nickname = name;
 	}
 
 	public Charclass getCharclass() {
@@ -100,6 +105,22 @@ public class Player {
 
 	public void setMissions(List<Ref<Mission>> missions) {
 		this.missions = missions;
+	}
+
+	public long getGold() {
+		return gold;
+	}
+
+	public void setGold(long gold) {
+		this.gold = gold;
+	}
+
+	public List<Ref<Player>> getMercenaries() {
+		return mercenaries;
+	}
+
+	public void setMercenaries(List<Ref<Player>> mercenaries) {
+		this.mercenaries = mercenaries;
 	}
 
 }

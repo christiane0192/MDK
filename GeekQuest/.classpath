@@ -15,5 +15,6 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/objectify-5.1.5.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Christiane/Desktop/Studium/Master Software Engineering/1. Semester/MDK/appengine-java-sdk-1.9.18/appengine-java-sdk-1.9.18/lib/testing/appengine-testing.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Christiane/Desktop/Studium/Master Software Engineering/1. Semester/MDK/appengine-java-sdk-1.9.18/appengine-java-sdk-1.9.18/lib/impl/appengine-api-stubs.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/guava-18.0.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
