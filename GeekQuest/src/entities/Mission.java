@@ -1,16 +1,19 @@
 package entities;
 
+import java.io.Serializable;
+
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
 
 @Entity
 @Index
-public class Mission {
+public class Mission implements Serializable {
 
 	@Id
 	private String description;
 	private boolean isAccomplished;
+	private String charclass;
 	private boolean isset;
 
 	public String getDescription() {
@@ -35,6 +38,14 @@ public class Mission {
 
 	public void setIsset(boolean isset) {
 		this.isset = isset;
+	}
+
+	public String getCharclass() {
+		return charclass;
+	}
+
+	public void setCharclass(String charclass) {
+		this.charclass = charclass;
 	}
 
 }

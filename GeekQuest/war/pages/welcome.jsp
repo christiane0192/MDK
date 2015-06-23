@@ -52,5 +52,13 @@
 <input type=hidden id="logout" name="logout" value="logout">
 <button type="submit" style="height: 30px; width: 100px;">Logout</button>
 </form>
+<form action="/welcome">
+<input type=hidden id="map" name="map" value="map">
+<button type="submit" style="height: 30px; width: 350px;">Start Map-Reduce Job for Eager Schema Evolution</button>
+</form>
+<form action="/welcome">
+<input type=hidden id="mapreduce" name="mapreduce" value="mapreduce">
+<button type="submit" style="height: 30px; width: 450px;">Start Map-Reduce Job for Eager Schema Evolution- Denormalization</button>
+</form>
 </body>
 </html>

@@ -1,5 +1,6 @@
 package entities;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,11 +14,11 @@ import com.googlecode.objectify.annotation.Load;
 
 @Entity
 @Index
-public class Player {
+public class Player implements Serializable {
 
 	@Id
 	private String email;
-	@AlsoLoad("name")
+	// @AlsoLoad("name")
 	private String nickname;
 	private Charclass charclass;
 	private long health;

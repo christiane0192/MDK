@@ -1,0 +1,7 @@
+<!-- This queue controls the rate at which a Map Reduce job will be worked. -->
+<queue-entries>
+<queue>
+	<name>mapreduce-workers</name>
+	<rate>10/m</rate>
+</queue>
+</queue-entries>

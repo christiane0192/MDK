@@ -24,6 +24,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import mapReduce.EagerSchemaMapperController;
+import mapReduce.EagerSchemaMapperDenormalizeController;
+
 import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
@@ -118,6 +121,12 @@ public class WelcomeServlet extends HttpServlet {
 			throws IOException {
 
 		initialize();
+		if (shouldStartMapReduceJob(req)) {
+			EagerSchemaMapperDenormalizeController.startMapJob();
+		}
+		if (shouldStartMapJob(req)) {
+			EagerSchemaMapperController.startMapJob();
+		}
 		String forwardedFile = "/pages/welcome.jsp";
 		if (userWantsToLogout(req)) {
 			resp.sendRedirect(createLogoutURL());
@@ -238,6 +247,14 @@ public class WelcomeServlet extends HttpServlet {
 
 	public boolean userWantsToLogout(HttpServletRequest req) {
 		return req.getParameter("logout") != null;
+	}
+
+	public boolean shouldStartMapJob(HttpServletRequest req) {
+		return req.getParameter("map") != null;
+	}
+
+	public boolean shouldStartMapReduceJob(HttpServletRequest req) {
+		return req.getParameter("mapreduce") != null;
 	}
 
 	public boolean userSetsNewScore(HttpServletRequest req) {

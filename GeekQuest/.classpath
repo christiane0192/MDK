@@ -16,5 +16,12 @@
 	<classpathentry kind="lib" path="C:/Users/Christiane/Desktop/Studium/Master Software Engineering/1. Semester/MDK/appengine-java-sdk-1.9.18/appengine-java-sdk-1.9.18/lib/testing/appengine-testing.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Christiane/Desktop/Studium/Master Software Engineering/1. Semester/MDK/appengine-java-sdk-1.9.18/appengine-java-sdk-1.9.18/lib/impl/appengine-api-stubs.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/guava-18.0.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/appengine-pipeline-0.2.11.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/appengine-gcs-client-0.4.4.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/appengine-mapreduce-0.8.4.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/protobuf-java-2.6.1.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jackson-core-2.5.4.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jackson-databind-2.5.4.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jackson-annotations-2.5.4.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
